@@ -10,6 +10,7 @@ class HistoryModel(BaseModel):
     user_id: int
     animale_name : str
     animale_rate_reconize : int
+    uri: str
 
 
 @router.post("/add_history")
@@ -19,6 +20,7 @@ def addHistory(data: HistoryModel, db: Session=Depends(get_db)):
         user_id=data.user_id,
         animale_name=data.animale_name,
         animale_rate_reconize=data.animale_rate_reconize,
+        uri=data.uri
     )
 
     try:
@@ -31,4 +33,4 @@ def addHistory(data: HistoryModel, db: Session=Depends(get_db)):
         }
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail="Une erreu c'est produit lors de l'ajouter d'un element de l'historique dans la bdd")
+        raise HTTPException(status_code=500, detail="Une erreure c'est produit lors de l'ajouter d'un element de l'historique dans la bdd")

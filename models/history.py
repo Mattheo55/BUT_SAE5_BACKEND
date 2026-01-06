@@ -10,5 +10,6 @@ class History(Base):
     animale_name = Column(String(255))
     animale_rate_reconize = Column(Integer)
     date = Column(DateTime(timezone=True), server_default=func.now())
+    uri = Column(String(255))
 
     owner = relationship("User", back_populates="histories")
