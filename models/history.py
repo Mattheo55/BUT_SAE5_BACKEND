@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, func
 from sqlalchemy.orm import mapped_column, relationship
 from database import Base
 
@@ -9,5 +9,6 @@ class History(Base):
     user_id = mapped_column(ForeignKey("user.id"))
     animale_name = Column(String(255))
     animale_rate_reconize = Column(Integer)
+    date = Column(DateTime(timezone=True), server_default=func.now())
 
     owner = relationship("User", back_populates="histories")

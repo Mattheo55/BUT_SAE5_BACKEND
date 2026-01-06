@@ -6,6 +6,7 @@ from login import router as login_router
 from register import router as register_router
 from me import router as me_router
 from add_history import router as add_history_router
+from get_user_history import router as get_history_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -24,3 +25,4 @@ app.include_router(login_router, tags=["Login"])
 app.include_router(register_router, tags=["Register"])
 app.include_router(me_router, tags=["User"])
 app.include_router(add_history_router, tags=["AddHistory"])
+app.include_router(get_history_router, tags=["GetHistory"])
