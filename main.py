@@ -7,7 +7,7 @@ from register import router as register_router
 from me import router as me_router
 from add_history import router as add_history_router
 from get_user_history import router as get_history_router
-from analyze_animal import router as analyze_animal
+from analyze_animal import app as analyze_animal
 
 Base.metadata.create_all(bind=engine)
 

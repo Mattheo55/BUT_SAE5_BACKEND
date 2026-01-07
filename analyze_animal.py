@@ -1,8 +1,10 @@
-from fastapi import FastAPI, HTTPException
+import base64
+import cv2
+from fastapi import FastAPI, HTTPException, APIRouter
 from pydantic import BaseModel
 from ultralytics import YOLO
 
-app = FastAPI()
+app = APIRouter()
 
 try:
     model = YOLO('IA/best.pt') 
@@ -34,9 +36,16 @@ async def analyze_animal(request: ImageRequest):
             best_label = result.names[best_cls_id]
             best_score = round(best_conf * 100)
 
+            img_with_box = result.plot()
+
+            _, buffer = cv2.imencode('.jpg', img_with_box)
+
+            img_base64 = base64.b64encode(buffer).decode('utf-8')
+
             return {
                 "label": best_label,
-                "score": f"{best_score}%"
+                "score": f"{best_score}%",
+                "annoted_image": img_base64,
             }
         
         else:
