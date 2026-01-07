@@ -2,12 +2,9 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from ultralytics import YOLO
 
-# On utilise 'app' par convention, pas 'router' (sauf si c'est un sous-fichier)
 app = FastAPI()
 
-# Chargement du modèle (une seule fois au démarrage)
 try:
-    # Assure-toi que le dossier 'IA' est au même niveau que ce fichier python
     model = YOLO('IA/best.pt') 
     print("✅ Modèle chargé avec succès !")
 except Exception as e:
