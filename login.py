@@ -6,8 +6,12 @@ from models.user import User
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 from jose import jwt
+from dotenv import load_dotenv
+import os
 
-SECRET_KEY = "EGVESZG4BSR4G4ESRG85ES"
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 
 def create_access_token(data: dict):

@@ -4,10 +4,15 @@ from database import get_db
 from models.user import User
 from jose import jwt, JWTError
 from datetime import datetime, timezone
+import os
+from dotenv import load_dotenv
 
 router = APIRouter()
 
-SECRET_KEY = "EGVESZG4BSR4G4ESRG85ES"
+
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 
 @router.get("/me")
