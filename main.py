@@ -8,6 +8,7 @@ from me import router as me_router
 from add_history import router as add_history_router
 from get_user_history import router as get_history_router
 from analyze_animal import app as analyze_animal
+from get_last_history import router as get_last_history
 
 Base.metadata.create_all(bind=engine)
 
@@ -28,3 +29,4 @@ app.include_router(me_router, tags=["User"])
 app.include_router(add_history_router, tags=["AddHistory"])
 app.include_router(get_history_router, tags=["GetHistory"])
 app.include_router(analyze_animal, tags=["AnalyzeAnimal"])
+app.include_router(get_last_history, tags=["GetLastHistory"])
