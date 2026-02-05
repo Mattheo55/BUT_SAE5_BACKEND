@@ -1,7 +1,7 @@
 import io
 from fastapi import APIRouter, UploadFile, File
 from ultralytics import YOLO
-from PIL import Image
+from PIL import Image, ImageOps # 👈 Ajout de ImageOps pour la rotation
 
 app = APIRouter()
 
@@ -15,30 +15,39 @@ except Exception as e:
 @app.post('/analyze_file_direct')
 async def analyze_file_direct(file: UploadFile = File(...)):
     try:
-        # 1. Lire les octets du fichier envoyé par le téléphone
+        # 1. Lire les octets
         image_bytes = await file.read()
 
-        # 2. Convertir les octets en Image PIL (que YOLO peut comprendre)
+        # 2. Ouvrir l'image
         image = Image.open(io.BytesIO(image_bytes))
 
-        # 3. Lancer la prédiction
-        # conf=0.4 : On ignore tout ce qui est en dessous de 40% de certitude
-        results = model.predict(image, conf=0.4)
+        # 🔥 CORRECTION CRITIQUE : Remettre l'image à l'endroit
+        # Les téléphones envoient souvent l'image tournée à 90°. Cette ligne la redresse.
+        image = ImageOps.exif_transpose(image)
         
-        # 4. Analyser le résultat
-        result = results[0] # On prend la première (et seule) image
+        # Sécurité couleur (au cas où ce soit du PNG transparent)
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+
+        # 3. Lancer la prédiction
+        # On baisse le seuil à 0.25 (25%) pour être plus tolérant au début
+        results = model.predict(image, conf=0.25)
+        
+        result = results[0] # Première image
+
+        # --- ZONE DE DEBUG (Regarde ton terminal VPS !) ---
+        print(f"📸 Image reçue. Objets détectés : {len(result.boxes)}")
+        for box in result.boxes:
+            d_class = model.names[int(box.cls)]
+            d_conf = float(box.conf)
+            print(f"   👀 Vu : {d_class} ({int(d_conf*100)}%)")
+        # --------------------------------------------------
 
         if result.boxes:
-            # On prend la boîte avec le meilleur score (la première)
+            # On prend la meilleure détection
             box = result.boxes[0]
-            
-            # Récupérer l'ID de la classe (ex: 0, 1, 2)
             class_id = int(box.cls)
-            
-            # Récupérer le score (ex: 0.85)
             score = float(box.conf)
-            
-            # Récupérer le nom (ex: "Ours") grâce au dictionnaire du modèle
             label_name = model.names[class_id]
 
             return {
@@ -47,9 +56,8 @@ async def analyze_file_direct(file: UploadFile = File(...)):
             }
         
         else:
-            # Rien n'a été détecté
             return {"label": "Inconnu", "score": "0%"}
 
     except Exception as e:
-        print(f"Erreur analyse : {e}")
+        print(f"❌ Erreur critique analyse : {e}")
         return {"label": "Erreur", "score": "0%"}
