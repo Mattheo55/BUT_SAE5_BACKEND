@@ -1,7 +1,7 @@
 import io
 from fastapi import APIRouter, UploadFile, File
 from ultralytics import YOLO
-from PIL import Image, ImageOps # 👈 Ajout de ImageOps pour la rotation
+from PIL import Image, ImageOps 
 
 app = APIRouter()
 
@@ -21,34 +21,37 @@ async def analyze_file_direct(file: UploadFile = File(...)):
         # 2. Ouvrir l'image
         image = Image.open(io.BytesIO(image_bytes))
 
-        # 🔥 CORRECTION CRITIQUE : Remettre l'image à l'endroit
-        # Les téléphones envoient souvent l'image tournée à 90°. Cette ligne la redresse.
+        # Redressement image
         image = ImageOps.exif_transpose(image)
         
-        # Sécurité couleur (au cas où ce soit du PNG transparent)
+        # Sécurité couleur
         if image.mode != 'RGB':
             image = image.convert('RGB')
 
-        # 3. Lancer la prédiction
-        # On baisse le seuil à 0.25 (25%) pour être plus tolérant au début
+        # 3. Prédiction (Seuil à 0.25)
         results = model.predict(image, conf=0.25)
         
-        result = results[0] # Première image
+        result = results[0]
 
-        # --- ZONE DE DEBUG (Regarde ton terminal VPS !) ---
+        # Debug console
         print(f"📸 Image reçue. Objets détectés : {len(result.boxes)}")
         for box in result.boxes:
-            d_class = model.names[int(box.cls)]
-            d_conf = float(box.conf)
-            print(f"   👀 Vu : {d_class} ({int(d_conf*100)}%)")
-        # --------------------------------------------------
+             d_class = model.names[int(box.cls.item())] # Correction ici aussi pour le print
+             d_conf = float(box.conf.item())
+             print(f"   👀 Vu : {d_class} ({int(d_conf*100)}%)")
 
         if result.boxes:
             # On prend la meilleure détection
             box = result.boxes[0]
-            class_id = int(box.cls)
-            score = float(box.conf)
+            
+            # 🔥 CORRECTION CRITIQUE ICI 🔥
+            # On utilise .item() pour éviter le crash serveur
+            class_id = int(box.cls.item()) 
+            score = float(box.conf.item())
+            
             label_name = model.names[class_id]
+
+            print(f"🦊 DÉTECTÉ ET ENVOYÉ : {label_name}")
 
             return {
                 "label": label_name, 
@@ -59,5 +62,6 @@ async def analyze_file_direct(file: UploadFile = File(...)):
             return {"label": "Inconnu", "score": "0%"}
 
     except Exception as e:
-        print(f"❌ Erreur critique analyse : {e}")
+        # Affiche l'erreur réelle dans le terminal
+        print(f"❌ CRASH SERVEUR : {e}")
         return {"label": "Erreur", "score": "0%"}
