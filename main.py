@@ -11,6 +11,7 @@ from analyze_animal import app as analyze_animal
 from get_last_history import router as get_last_history
 from contribute import router as contribute
 from analyze_file_direct import app as file_direct 
+from check_model_version import app as version
 
 Base.metadata.create_all(bind=engine)
 
@@ -34,3 +35,4 @@ app.include_router(analyze_animal, tags=["AnalyzeAnimal"])
 app.include_router(get_last_history, tags=["GetLastHistory"])
 app.include_router(contribute, tags=["Contribute"])
 app.include_router(file_direct, tags=["FileDirect"])
+app.include_router(version, tags=['Version'])
