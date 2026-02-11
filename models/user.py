@@ -11,3 +11,4 @@ class User(Base):
     hashed_password = Column(String(255))
 
     histories = relationship("History", back_populates="owner")
+    contributions = relationship("Contribution", back_populates="owner")
