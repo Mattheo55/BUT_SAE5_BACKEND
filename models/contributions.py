@@ -12,4 +12,4 @@ class Contribution(Base):
     uri = Column(String(255))
 
 
-    owner = relationship("User", back_populates="histories")
+    owner = relationship("User", back_populates="contributions")
